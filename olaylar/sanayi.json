@@ -1,0 +1,22 @@
+[
+    { "metin": "⚙️ **Ağır Torna Tezgahı!** Metal parçalar işleniyor.", "dogru": "Fişini Çekip Durdur", "yanlis": "Çalışırken Parçayı Almaya Çalış" },
+    { "metin": "🔥 **Oksijen Kaynak Tüpü!** Basınçlı ve tehlikeli.", "dogru": "Güvenli Mesafeden Dolan", "yanlis": "Vana Kolunu Çevir" },
+    { "metin": "🚜 **Sanayi Forklifti!** Ana koridoru kapatmış.", "dogru": "Kontak Anahtarını Çevirip Kenara Çek", "yanlis": "Üzerine Tırmanıp Zıpla" },
+    { "metin": "⚡ **Yüksek Voltaj Panosu!** Fabrika elektrik merkezi.", "dogru": "İzole Eldivenle Aç", "yanlis": "Çıplak Elle Dokun" },
+    { "metin": "🔩 **Civata ve Somun Kutuları!** Yerde saçılmış durumda.", "dogru": "Kenardan Sessizce Süzül", "yanlis": "Üstüne Basarak Koş" },
+    { "metin": "🧯 **Atölye Yangın Tüpü!** Duvara monte kırmızı tüp.", "dogru": "Çarpmadan Etrafından Dolan", "yanlis": "Merak Edip Pini Çek" },
+    { "metin": "🚪 **Demir Sürgülü Atölye Kapısı!** Paslı raylı kapı.", "dogru": "Rayı Yağlayıp Sessiz Aç", "yanlis": "Hızla Asılıp Ses Çıkar" },
+    { "metin": "🗄️ **Usta Başı Çekmecesi!** Değerli uçlar ve anahtarlar.", "dogru": "Küçük Tornavidayla Kaldır", "yanlis": "Balyozla Kır" },
+    { "metin": "🛢️ **Endüstriyel Yağ Varili!** Zemine yağ sızdırmış.", "dogru": "Kaygan Alandan Sakınarak Geç", "yanlis": "Ortasından Koşarak Geç" },
+    { "metin": "🏗️ **Tavan Vinç Kumandası!** Kablolu kumanda sallanıyor.", "dogru": "Kenara Sabitleyip Sabit Tut", "yanlis": "Asılıp Sallanmaya Çalış" },
+    { "metin": "📦 **Hammadde Çuvalı Yığını!** Geçiş yolunu tıkıyor.", "dogru": "Sessizce Kenara İt", "yanlis": "Üstüne Çıkıp Düş" },
+    { "metin": "💡 **Halojen Atölye Lambası!** Çok güçlü ışık veriyor.", "dogru": "Şalteri İndirip Karanlıkta Kal", "yanlis": "Ampulü Kır" },
+    { "metin": "📋 **İş Güvenlik Panosu!** Masada vardiya çizelgesi var.", "dogru": "Fotoğrafını Çekip Bırak", "yanlis": "Yırtıp Parçala" },
+    { "metin": "🔍 **Hassas Kumpas Aleti!** Tezgah üstünde duruyor.", "dogru": "Dokunmadan Uzaklaş", "yanlis": "Cebine Atıp Al" },
+    { "metin": "🔑 **Yedek Depo Anahtarı!** Panoda asılı duruyor.", "dogru": "Cımbızla Lazım Olanı Al", "yanlis": "Hepsini Birden Çek" },
+    { "metin": "🔊 **Kompresör Motoru!** Yüksek sesle çalışıyor.", "dogru": "Geçici Olarak Fişini Çek", "yanlis": "Üzerine Vurarak Sustur" },
+    { "metin": "🧱 **Tuğla ve Harç Yığını!** İnşaat malzemesi alanı.", "dogru": "Etrafından Dolanarak İlerle", "yanlis": "Malzemeleri Devir" },
+    { "metin": "🧹 **Tel Fırça ve Temizlik Aracı!** Yerde unutulmuş.", "dogru": "Kenara Sessizce Al", "yanlis": "Üzerine Basarak Kay" },
+    { "metin": "🚗 **Tamirattaki Araç!** Lift üzerinde havada duruyor.", "dogru": "Altından Eğilerek Geç", "yanlis": "Lifti İndirmeye Çalış" },
+    { "metin": "🚨 **Atölye Güvenlik Sireni!** Duvara monte alarm kutusu.", "dogru": "Kablo Bağlantısını Kes", "yanlis": "Elini Vurarak Sustur" }
+]

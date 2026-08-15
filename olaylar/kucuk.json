@@ -1,0 +1,22 @@
+[
+    { "metin": "🏪 **Kepenk Kilidi!** Bakkalın ana demir kepenginin asma kilidi var.", "dogru": "Demir Testeresiyle Kes", "yanlis": "Maymuncukla Aç" },
+    { "metin": "🐱 **Mahalle Kedisi!** İçeriden miyavlama sesleri geliyor, dikkat çekebilir.", "dogru": "Sosis Atıp Uzaklaştır", "yanlis": "Yavaşça Kenara It" },
+    { "metin": "📻 **Eski Teyp!** Tezgah üstündeki radyo yüksek sesle çalıyor.", "dogru": "Fişini Çek", "yanlis": "Ses Düğmesini Kıs" },
+    { "metin": "🚪 **Tahta Arka Kapı!** İçeriye girmek için arka kapı duruyor.", "dogru": "Tornavidayla Mandalı İttir", "yanlis": "Omuz Atıp Zorla" },
+    { "metin": "🗄️ **Yazar Kasa Çekmecesi!** Günlük hasılat kasada duruyor.", "dogru": "Küçük Tornavidayla Kasayı Kaldır", "yanlis": "Şifreyi Rastgele Tuşla" },
+    { "metin": "💡 **Asma Lamba!** İçeriyi aydınlatan tek bir ampul yanıyor.", "dogru": "Şalteri İndirip Karanlıkta Kal", "yanlis": "Ampulü Sök" },
+    { "metin": "📦 **Koli Yığınları!** Geçiş yolunu koliler kapatmış.", "dogru": "Kolileri Sessizce Kenara Kaydır", "yanlis": "Üzerinden Atlaya Geç" },
+    { "metin": "🪞 **Vitrin Aynası!** Dışarıdan görünmemek gerekiyor.", "dogru": "Önüne Karton Koy", "yanlis": "Eğilerek İlerle" },
+    { "metin": "📝 **Veresiye Defteri!** Tezgahta dükkan sahibinin defteri duruyor.", "dogru": "Sayfaları İncele", "yanlis": "Olduğu Gibi Bırak" },
+    { "metin": "🚪 **İç Oda Kapısı!** Depo kısmına açılan ahşap kapı kilitli.", "dogru": "Menteşeleri Yağla", "yanlis": "Tekme Atıp Aç" },
+    { "metin": "🍫 **Çikolata Standı!** Yolunu kapatıyor, devrilebilir.", "dogru": "Kenarından Sessizce Süzül", "yanlis": "Kutuları Iterek Geç" },
+    { "metin": "🥤 **Buzdolabı Motoru!** Derin dondurucu çok ses çıkarıyor.", "dogru": "Fişini Geçici Olarak Çek", "yanlis": "Üzerine Vurarak Sustur" },
+    { "metin": "🏷️ **Fiyat Etiket Makinesi!** Masanın üzerinde duruyor.", "dogru": "Dokunmadan Uzaklaş", "yanlis": "Cebe Atıp Al" },
+    { "metin": "🪟 **Ön Cam Çatlağı!** Dışarıdan bakan biri görebilir.", "dogru": "Koyu Renk Perde Çek", "yanlis": "Camın Önünde Dikil" },
+    { "metin": "🧹 **Temizlik Kovası!** Koridorun ortasında bırakılmış.", "dogru": "Kenara Sessizce Al", "yanlis": "İçine Basarak Geç" },
+    { "metin": "📦 **Sigara Kolisi!** Tezgahın arkasında duruyor.", "dogru": "Sessizce Sırt Çantasına Doldur", "yanlis": "Kutuyu Açıp Tek Tek Say" },
+    { "metin": "🧯 **Tezgah Altı Yangın Tüpü!** Ayağa takılabilir.", "dogru": "Etrafından Dolanarak Geç", "yanlis": "Üzerine Basarak İlerle" },
+    { "metin": "🪞 **Duvar Aynası!** İçeriği yansıtıyor.", "dogru": "Örtü ile Kapat", "yanlis": "Aynaya Bakarak Yürü" },
+    { "metin": "🛎️ **Masa Zili!** Üzerine el çarpabilir.", "dogru": "Elini Temkinli Uzat", "yanlis": "Hızlıca Vurarak Geç" },
+    { "metin": "🗄️ **Eski Karton Kutu!** Yolu tıkıyor.", "dogru": "Kenara Sessizce İt", "yanlis": "Tekme Atıp Devir" }
+]

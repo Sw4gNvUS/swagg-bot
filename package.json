@@ -1,0 +1,13 @@
+{
+  "name": "royal-bot",
+  "version": "1.0.0",
+  "description": "Güvenli Discord Mini Oyun Botu",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "discord.js": "^14.14.1",
+    "dotenv": "^16.6.1"
+  }
+}
