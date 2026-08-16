@@ -184,8 +184,7 @@ function setupSoygun(client, puanlar, savePuanlar) {
                 const collector = mesajObjesi.createMessageComponentCollector({ filter: filterBtn, componentType: ComponentType.Button, time: 20000 });
 
                 collector.on('collect', async i => {
-                    // Butona basıldığı an Discord'a "işliyorum" sinyali basıyoruz (zaman aşımı hatasını keser)
-                    await i.deferUpdate();
+                    // Zaman aşımını önlemek için collector'ı hemen durduruyoruz
                     collector.stop('clicked');
 
                     const disabledRow = new ActionRowBuilder().addComponents(
@@ -194,12 +193,13 @@ function setupSoygun(client, puanlar, savePuanlar) {
                     );
 
                     if (i.customId === olay.dogruCevap) {
-                        await i.editReply({ content: `${mesajObjesi.content}\n\n✅ Seçtiğin hamle başarılı! Bir sonraki adıma geçiliyor...`, components: [disabledRow] });
+                        // update kullanarak Discord'a anında dönüş yapıyoruz
+                        await i.update({ content: `${mesajObjesi.content}\n\n✅ Seçtiğin hamle başarılı! Bir sonraki adıma geçiliyor...`, components: [disabledRow] });
                         adim++;
                         await sonrakiAdimiIslet(i, adim);
                     } else {
                         aktifSoygunYapan = null;
-                        await i.editReply({ content: `${mesajObjesi.content}\n\n🚨 **YAKALANDIN!**\nHamleni seçtin ancak bu yanlış hamleydi! Alarm çaldı, polisler etrafını sardı ve elendin. ⛓️`, components: [disabledRow] });
+                        await i.update({ content: `${mesajObjesi.content}\n\n🚨 **YAKALANDIN!**\nHamleni seçtin ancak bu yanlış hamleydi! Alarm çaldı, polisler etrafını sardı ve elendin. ⛓️`, components: [disabledRow] });
                     }
                 });
 
