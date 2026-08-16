@@ -60,7 +60,7 @@ function setupSoygun(client, puanlar, savePuanlar) {
             }
         }
 
-        // 3 saniye zaman aşımı (timeout) hatasını önlemek için yanıtı erteliyoruz.
+        // Zaman aşımını önlemek için komut başlangıcını erteliyoruz
         await interaction.deferReply();
 
         aktifSoygunYapan = interaction.user.id;
@@ -78,7 +78,6 @@ function setupSoygun(client, puanlar, savePuanlar) {
 
         const row = new ActionRowBuilder().addComponents(selectMenu);
 
-        // Defer kullandığımız için mesajı editReply ile gönderiyoruz.
         const initialReply = await interaction.editReply({
             content: "🦹‍♂️ **Büyük Soygun Planı Kuruluyor!**\nAşağıdaki listeden soygun yapmak istediğin mekanı seç ve maceraya başla:",
             components: [row]
@@ -88,7 +87,10 @@ function setupSoygun(client, puanlar, savePuanlar) {
         const menuCollector = initialReply.createMessageComponentCollector({ filter: filterMenu, componentType: ComponentType.StringSelect, time: 30000 });
 
         menuCollector.on('collect', async menuInteraction => {
+            // Menü seçiminde de zaman aşımı hatası almamak için önce deferUpdate yapıyoruz
+            await menuInteraction.deferUpdate();
             menuCollector.stop();
+
             const secilenMekanId = menuInteraction.values[0];
 
             if (!tamamlananSoygunlar[interaction.user.id]) {
@@ -98,7 +100,7 @@ function setupSoygun(client, puanlar, savePuanlar) {
             if (tamamlananSoygunlar[interaction.user.id].has(secilenMekanId)) {
                 aktifSoygunYapan = null;
                 const mekanBilgi = mekanlar.find(m => m.id === secilenMekanId);
-                return await menuInteraction.update({
+                return await menuInteraction.editReply({
                     content: `🛑 **Zaten burayı patlattınız dostum!** "${mekanBilgi.isim}" mekanını daha önce başarıyla soydunuz, güvenlik sistemi artık çok sıkı ve kasada atacak ekmek kalmadı. Başka bir hedef seçin! 🎭🏦`,
                     components: []
                 });
@@ -140,7 +142,7 @@ function setupSoygun(client, puanlar, savePuanlar) {
 
             const ilkAdimMesaj = `📍 **Mekan:** ${mekan.isim}\n🦹‍♂️ **Soygun Adımı 1/${toplamAdim}**\n\n${aktifOlay.metin}\n\nNe yapacaksın? Hızlı karar ver! *(Yanlış seçimde hemen elenirsin!)*`;
 
-            let sonGonderilenMesaj = await menuInteraction.update({ content: ilkAdimMesaj, components: [buttonRow], fetchReply: true });
+            let sonGonderilenMesaj = await menuInteraction.editReply({ content: ilkAdimMesaj, components: [buttonRow] });
 
             async function sonrakiAdimiIslet(gecerliInteraction, mevcutAdim) {
                 if (mevcutAdim > toplamAdim) {
@@ -156,9 +158,9 @@ function setupSoygun(client, puanlar, savePuanlar) {
                     const finalMesaj = `ㅤ ㅤㅤ\nㅤ\n🎉 **SOYGUN BAŞARILI! (${mekan.isim})**\nZorlu ${toplamAdim} adımı başarıyla atlattın, kasayı patlattın ve paraları çantaya doldurup kaçtın! 💸\n\n💰 **Kazanılan:** ${odul} Puan \n🏆 **Toplam Puanın:** ${puanlar[interaction.user.id]}`;
                     
                     try {
-                        return await gecerliInteraction.update({ content: finalMesaj, components: [] });
+                        return await gecerliInteraction.editReply({ content: finalMesaj, components: [] });
                     } catch (error) {
-                        return await gecerliInteraction.channel.send({ content: finalMesaj, components: [] });
+                        return await interaction.channel.send({ content: finalMesaj, components: [] });
                     }
                 }
 
@@ -170,7 +172,8 @@ function setupSoygun(client, puanlar, savePuanlar) {
 
                 const yeniMesajIcerik = `ㅤ ㅤㅤ\nㅤ\n📍 **Mekan:** ${mekan.isim}\n🦹‍♂️ **Soygun Adımı ${mevcutAdim}/${toplamAdim}**\n\n${yeniOlay.metin}\n\nNe yapacaksın? Hızlı karar ver! *(Yanlış seçimde hemen elenirsin!)*`;
 
-                sonGonderilenMesaj = await gecerliInteraction.channel.send({ content: yeniMesajIcerik, components: [yeniRow] });
+                // Adımlar arası geçişte yeni mesaj atmak yerine orijinal mesajı düzenliyoruz (editReply)
+                sonGonderilenMesaj = await gecerliInteraction.editReply({ content: yeniMesajIcerik, components: [yeniRow] });
 
                 kurCollector(sonGonderilenMesaj, mevcutAdim);
             }
@@ -181,21 +184,22 @@ function setupSoygun(client, puanlar, savePuanlar) {
                 const collector = mesajObjesi.createMessageComponentCollector({ filter: filterBtn, componentType: ComponentType.Button, time: 20000 });
 
                 collector.on('collect', async i => {
+                    // Butona basıldığı an Discord'a "işliyorum" sinyali basıyoruz (zaman aşımı hatasını keser)
+                    await i.deferUpdate();
                     collector.stop('clicked');
 
-                    const secilenIslem = i.customId === 'btn1' ? olay.btn1 : olay.btn2;
                     const disabledRow = new ActionRowBuilder().addComponents(
                         new ButtonBuilder().setCustomId('btn1').setLabel(olay.btn1).setStyle(ButtonStyle.Secondary).setDisabled(true),
                         new ButtonBuilder().setCustomId('btn2').setLabel(olay.btn2).setStyle(ButtonStyle.Secondary).setDisabled(true)
                     );
 
                     if (i.customId === olay.dogruCevap) {
-                        await i.update({ content: `${mesajObjesi.content}\n\n✅ Seçtiğin hamle başarılı! Bir sonraki adıma geçiliyor...`, components: [disabledRow] });
+                        await i.editReply({ content: `${mesajObjesi.content}\n\n✅ Seçtiğin hamle başarılı! Bir sonraki adıma geçiliyor...`, components: [disabledRow] });
                         adim++;
                         await sonrakiAdimiIslet(i, adim);
                     } else {
                         aktifSoygunYapan = null;
-                        await i.update({ content: `${mesajObjesi.content}\n\n🚨 **YAKALANDIN!**\nHamleni seçtin ancak bu yanlış hamleydi! Alarm çaldı, polisler etrafını sardı ve elendin. ⛓️`, components: [disabledRow] });
+                        await i.editReply({ content: `${mesajObjesi.content}\n\n🚨 **YAKALANDIN!**\nHamleni seçtin ancak bu yanlış hamleydi! Alarm çaldı, polisler etrafını sardı ve elendin. ⛓️`, components: [disabledRow] });
                     }
                 });
 
@@ -219,7 +223,7 @@ function setupSoygun(client, puanlar, savePuanlar) {
         menuCollector.on('end', collected => {
             if (collected.size === 0) {
                 aktifSoygunYapan = null;
-                initialReply.edit({ content: "⏳ Süre dolduğu için mekan seçimi iptal edildi.", components: [] }).catch(() => {});
+                interaction.editReply({ content: "⏳ Süre dolduğu için mekan seçimi iptal edildi.", components: [] }).catch(() => {});
             }
         });
     });
