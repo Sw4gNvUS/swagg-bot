@@ -37,81 +37,195 @@ kategoriler.forEach(kategori => {
     if (fs.existsSync(dosyaYolu)) {
         try {
             mekanOlaylari[kategori] = JSON.parse(fs.readFileSync(dosyaYolu, 'utf8'));
-        } catch (e) { mekanOlaylari[kategori] = []; }
-    } else { mekanOlaylari[kategori] = []; }
+        } catch (e) {
+            mekanOlaylari[kategori] = [];
+        }
+    } else {
+        mekanOlaylari[kategori] = [];
+    }
 });
 
 const tamamlananSoygunlar = {};
-const aktifSoygunlar = new Set();
+let aktifSoygunYapan = null;
 
 function setupSoygun(client, puanlar, savePuanlar) {
     client.on('interactionCreate', async interaction => {
-        if (interaction.isChatInputCommand() && interaction.commandName === 'soygun') {
-            if (aktifSoygunlar.has(interaction.user.id)) return interaction.reply({ content: "⚠️ Zaten devam eden bir soygunun var!", ephemeral: true });
-            
-            await interaction.deferReply();
-            aktifSoygunlar.add(interaction.user.id);
+        if (!interaction.isChatInputCommand() || interaction.commandName !== 'soygun') return;
 
-            const row = new ActionRowBuilder().addComponents(
-                new StringSelectMenuBuilder()
-                    .setCustomId('mekan_secim')
-                    .setPlaceholder('Nereyi soyuyoruz?')
-                    .addOptions(mekanlar.map(m => ({ label: `${m.isim} (${m.adimSayisi} Adım)`, value: m.id })))
+        if (aktifSoygunYapan !== null) {
+            if (aktifSoygunYapan === interaction.user.id) {
+                return interaction.reply({ content: "⚠️ Zaten devam eden bir soygunun var! Aktif adımlarını tamamla.", ephemeral: true });
+            } else {
+                return interaction.reply({ content: `🚨 **Şehirde başka bir soygun var!** Şu an <@${aktifSoygunYapan}> büyük vurgunu gerçekleştiriyor. Önce o hırsızın işini bitirmesini bekle, sonra sıra sana gelir! 💰⛓️`, ephemeral: true });
+            }
+        }
+
+        // Zaman aşımını önlemek için komut başlangıcını erteliyoruz
+        await interaction.deferReply();
+
+        aktifSoygunYapan = interaction.user.id;
+
+        const selectMenu = new StringSelectMenuBuilder()
+            .setCustomId('mekan_secim')
+            .setPlaceholder('Nereyi soyuyoruz? Bir mekan seç...')
+            .addOptions(
+                mekanlar.map(m => new StringSelectMenuOptionBuilder()
+                    .setLabel(`${m.isim} (${m.adimSayisi} Adım)`)
+                    .setDescription(`Ödül Çarpanı: ${m.adimSayisi * 3} Katı Puan`)
+                    .setValue(m.id)
+                )
             );
 
-            const msg = await interaction.editReply({ content: "🦹‍♂️ **Mekan seç:**", components: [row] });
-            const collector = msg.createMessageComponentCollector({ filter: i => i.user.id === interaction.user.id, time: 30000 });
+        const row = new ActionRowBuilder().addComponents(selectMenu);
 
-            collector.on('collect', async i => {
-                await i.deferUpdate();
-                collector.stop('selected');
+        const initialReply = await interaction.editReply({
+            content: "🦹‍♂️ **Büyük Soygun Planı Kuruluyor!**\nAşağıdaki listeden soygun yapmak istediğin mekanı seç ve maceraya başla:",
+            components: [row]
+        });
+
+        const filterMenu = i => i.user.id === interaction.user.id;
+        const menuCollector = initialReply.createMessageComponentCollector({ filter: filterMenu, componentType: ComponentType.StringSelect, time: 30000 });
+
+        menuCollector.on('collect', async menuInteraction => {
+            // Menü seçiminde de zaman aşımı hatası almamak için önce deferUpdate yapıyoruz
+            await menuInteraction.deferUpdate();
+            menuCollector.stop();
+
+            const secilenMekanId = menuInteraction.values[0];
+
+            if (!tamamlananSoygunlar[interaction.user.id]) {
+                tamamlananSoygunlar[interaction.user.id] = new Set();
+            }
+
+            if (tamamlananSoygunlar[interaction.user.id].has(secilenMekanId)) {
+                aktifSoygunYapan = null;
+                const mekanBilgi = mekanlar.find(m => m.id === secilenMekanId);
+                return await menuInteraction.editReply({
+                    content: `🛑 **Zaten burayı patlattınız dostum!** "${mekanBilgi.isim}" mekanını daha önce başarıyla soydunuz, güvenlik sistemi artık çok sıkı ve kasada atacak ekmek kalmadı. Başka bir hedef seçin! 🎭🏦`,
+                    components: []
+                });
+            }
+
+            const mekan = mekanlar.find(m => m.id === secilenMekanId);
+
+            let adim = 1;
+            const toplamAdim = mekan.adimSayisi;
+
+            const kategoriHavuzu = mekanOlaylari[mekan.kategori] || mekanOlaylari['orta'];
+            
+            const secilenOlaylar = [...kategoriHavuzu]
+                .sort(() => 0.5 - Math.random())
+                .slice(0, toplamAdim);
+
+            const oyunOlaylari = [];
+            for (let j = 0; j < secilenOlaylar.length; j++) {
+                const temelOlay = secilenOlaylar[j];
                 
-                const mekan = mekanlar.find(m => m.id === i.values[0]);
-                const oyunOlaylari = (mekanOlaylari[mekan.kategori] || mekanOlaylari['orta']).sort(() => 0.5 - Math.random()).slice(0, mekan.adimSayisi);
-                
-                let adim = 0;
-                
-                async function guncelle(btnInteraction = null) {
-                    if (adim >= oyunOlaylari.length) {
-                        aktifSoygunlar.delete(interaction.user.id);
-                        const odul = (mekan.adimSayisi * 3) + Math.floor(Math.random() * 20);
-                        puanlar[interaction.user.id] = (puanlar[interaction.user.id] || 0) + odul;
-                        savePuanlar();
-                        return (btnInteraction || interaction).editReply({ content: `🎉 **Başarılı!** ${odul} puan kazandın.`, components: [] });
+                const dogruButondaMi = Math.random() < 0.5;
+                const secenek1 = dogruButondaMi ? temelOlay.dogru : temelOlay.yanlis;
+                const secenek2 = dogruButondaMi ? temelOlay.yanlis : temelOlay.dogru;
+                const dogruTus = dogruButondaMi ? 'btn1' : 'btn2';
+
+                oyunOlaylari.push({
+                    metin: temelOlay.metin,
+                    btn1: secenek1,
+                    btn2: secenek2,
+                    dogruCevap: dogruTus
+                });
+            }
+
+            const aktifOlay = oyunOlaylari[0];
+            const buttonRow = new ActionRowBuilder().addComponents(
+                new ButtonBuilder().setCustomId('btn1').setLabel(aktifOlay.btn1).setStyle(ButtonStyle.Danger),
+                new ButtonBuilder().setCustomId('btn2').setLabel(aktifOlay.btn2).setStyle(ButtonStyle.Danger)
+            );
+
+            const ilkAdimMesaj = `📍 **Mekan:** ${mekan.isim}\n🦹‍♂️ **Soygun Adımı 1/${toplamAdim}**\n\n${aktifOlay.metin}\n\nNe yapacaksın? Hızlı karar ver! *(Yanlış seçimde hemen elenirsin!)*`;
+
+            let sonGonderilenMesaj = await menuInteraction.editReply({ content: ilkAdimMesaj, components: [buttonRow] });
+
+            async function sonrakiAdimiIslet(gecerliInteraction, mevcutAdim) {
+                if (mevcutAdim > toplamAdim) {
+                    aktifSoygunYapan = null;
+                    
+                    tamamlananSoygunlar[interaction.user.id].add(secilenMekanId);
+
+                    const carpan = toplamAdim * 3;
+                    const odul = Math.floor(Math.random() * (toplamAdim * 5)) + carpan;
+                    puanlar[interaction.user.id] = (puanlar[interaction.user.id] || 0) + odul;
+                    savePuanlar();
+
+                    const finalMesaj = `ㅤ ㅤㅤ\nㅤ\n🎉 **SOYGUN BAŞARILI! (${mekan.isim})**\nZorlu ${toplamAdim} adımı başarıyla atlattın, kasayı patlattın ve paraları çantaya doldurup kaçtın! 💸\n\n💰 **Kazanılan:** ${odul} Puan \n🏆 **Toplam Puanın:** ${puanlar[interaction.user.id]}`;
+                    
+                    try {
+                        return await gecerliInteraction.editReply({ content: finalMesaj, components: [] });
+                    } catch (error) {
+                        return await interaction.channel.send({ content: finalMesaj, components: [] });
                     }
-
-                    const olay = oyunOlaylari[adim];
-                    const dogru = Math.random() < 0.5;
-                    const row = new ActionRowBuilder().addComponents(
-                        new ButtonBuilder().setCustomId('btn1').setLabel(dogru ? olay.dogru : olay.yanlis).setStyle(ButtonStyle.Danger),
-                        new ButtonBuilder().setCustomId('btn2').setLabel(dogru ? olay.yanlis : olay.dogru).setStyle(ButtonStyle.Danger)
-                    );
-
-                    const content = `📍 **${mekan.isim}** - Adım ${adim + 1}/${mekan.adimSayisi}
-${olay.metin}`;
-                    if (btnInteraction) await btnInteraction.editReply({ content, components: [row] });
-                    else await interaction.editReply({ content, components: [row] });
                 }
 
-                await guncelle();
-                const gameCollector = msg.createMessageComponentCollector({ filter: c => c.user.id === interaction.user.id, time: 20000 });
+                const yeniOlay = oyunOlaylari[mevcutAdim - 1];
+                const yeniRow = new ActionRowBuilder().addComponents(
+                    new ButtonBuilder().setCustomId('btn1').setLabel(yeniOlay.btn1).setStyle(ButtonStyle.Danger),
+                    new ButtonBuilder().setCustomId('btn2').setLabel(yeniOlay.btn2).setStyle(ButtonStyle.Danger)
+                );
 
-                gameCollector.on('collect', async c => {
-                    await c.deferUpdate();
-                    const olay = oyunOlaylari[adim];
-                    const dogruTus = (c.customId === 'btn1' && (c.component.label === olay.dogru)) || (c.customId === 'btn2' && (c.component.label === olay.dogru));
+                const yeniMesajIcerik = `ㅤ ㅤㅤ\nㅤ\n📍 **Mekan:** ${mekan.isim}\n🦹‍♂️ **Soygun Adımı ${mevcutAdim}/${toplamAdim}**\n\n${yeniOlay.metin}\n\nNe yapacaksın? Hızlı karar ver! *(Yanlış seçimde hemen elenirsin!)*`;
 
-                    if (dogruTus) {
+                // Adımlar arası geçişte yeni mesaj atmak yerine orijinal mesajı düzenliyoruz (editReply)
+                sonGonderilenMesaj = await gecerliInteraction.editReply({ content: yeniMesajIcerik, components: [yeniRow] });
+
+                kurCollector(sonGonderilenMesaj, mevcutAdim);
+            }
+
+            function kurCollector(mesajObjesi, adimNumarasi) {
+                const olay = oyunOlaylari[adimNumarasi - 1];
+                const filterBtn = i => i.user.id === interaction.user.id;
+                const collector = mesajObjesi.createMessageComponentCollector({ filter: filterBtn, componentType: ComponentType.Button, time: 20000 });
+
+                collector.on('collect', async i => {
+                    // Butona basıldığı an Discord'a "işliyorum" sinyali basıyoruz (zaman aşımı hatasını keser)
+                    await i.deferUpdate();
+                    collector.stop('clicked');
+
+                    const disabledRow = new ActionRowBuilder().addComponents(
+                        new ButtonBuilder().setCustomId('btn1').setLabel(olay.btn1).setStyle(ButtonStyle.Secondary).setDisabled(true),
+                        new ButtonBuilder().setCustomId('btn2').setLabel(olay.btn2).setStyle(ButtonStyle.Secondary).setDisabled(true)
+                    );
+
+                    if (i.customId === olay.dogruCevap) {
+                        await i.editReply({ content: `${mesajObjesi.content}\n\n✅ Seçtiğin hamle başarılı! Bir sonraki adıma geçiliyor...`, components: [disabledRow] });
                         adim++;
-                        await guncelle(c);
+                        await sonrakiAdimiIslet(i, adim);
                     } else {
-                        aktifSoygunlar.delete(interaction.user.id);
-                        gameCollector.stop();
-                        await c.editReply({ content: "🚨 **YAKALANDIN!**", components: [] });
+                        aktifSoygunYapan = null;
+                        await i.editReply({ content: `${mesajObjesi.content}\n\n🚨 **YAKALANDIN!**\nHamleni seçtin ancak bu yanlış hamleydi! Alarm çaldı, polisler etrafını sardı ve elendin. ⛓️`, components: [disabledRow] });
                     }
                 });
-            });
-        }
+
+                collector.on('end', async (collected, reason) => {
+                    if (reason === 'time') {
+                        aktifSoygunYapan = null;
+                        try {
+                            const disabledRow = new ActionRowBuilder().addComponents(
+                                new ButtonBuilder().setCustomId('btn1').setLabel(olay.btn1).setStyle(ButtonStyle.Secondary).setDisabled(true),
+                                new ButtonBuilder().setCustomId('btn2').setLabel(olay.btn2).setStyle(ButtonStyle.Secondary).setDisabled(true)
+                            );
+                            await mesajObjesi.edit({ content: `${mesajObjesi.content}\n\n⏳ **Zaman doldu!** Kararsız kaldığın için güvenlik seni fark etti. Soygun iptal edildi ve elendin!`, components: [disabledRow] });
+                        } catch (e) {}
+                    }
+                });
+            }
+
+            kurCollector(sonGonderilenMesaj, adim);
+        });
+
+        menuCollector.on('end', collected => {
+            if (collected.size === 0) {
+                aktifSoygunYapan = null;
+                interaction.editReply({ content: "⏳ Süre dolduğu için mekan seçimi iptal edildi.", components: [] }).catch(() => {});
+            }
+        });
     });
 }
 
