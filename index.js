@@ -106,12 +106,15 @@ client.on('messageCreate', async message => {
         });
         activeGames.delete(message.channel.id); 
     } else {
-        await message.react(guess < game.secretNum ? '⬆️' : '⬇️');
-        await message.reply(guess < game.secretNum ? "<:cat_2:1483067331797061703> Yanlış Daha **büyük** bir sayı söyle! 📈 *(sıra başka oyuncuda)*" : "<:cat_2:1483067331797061703> Yanlış Daha **küçük** bir sayı söyle! 📉 *(sıra başka oyuncuda)*");
+        // message.react kaldırıldı, böylece bot ekstradan API yüküne girmeden anında yanıt verecek.
+        const yonlendirme = guess < game.secretNum 
+            ? "⬆️ Yanlış! Daha **büyük** bir sayı söyle! 📈 *(sıra başka oyuncuda)*" 
+            : "⬇️ Yanlış! Daha **küçük** bir sayı söyle! 📉 *(sıra başka oyuncuda)*";
+
+        await message.reply(`<:cat_2:1483067331797061703> ${yonlendirme}`);
     }
 });
 
 setupSoygun(client, puanlar, savePuanlar);
 
-// Token, artık .env dosyasından çekilecek
 client.login(process.env.DISCORD_TOKEN);
