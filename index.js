@@ -88,8 +88,8 @@ client.on('interactionCreate', async interaction => {
             } else {
                 // HATA DÜZELTİLDİ: Template literal kullanımı düzeltildi
                 const hint = guess < game.secretNum 
-                    ? `<:cat_2:1483067331797061703> Yanlış ${interaction.user}! Daha **büyük** bir sayı söyle! 📈 ⬆️ *(sıra başka oyuncuda)*` 
-                    : `<:cat_2:1483067331797061703> Yanlış ${interaction.user}! Daha **küçük** bir sayı söyle! 📉 ⬇️ *(sıra başka oyuncuda)*`;
+                    ? `<:cat_2:1483067331797061703> İddea ${guess} Yanlış ${interaction.user}! Daha **büyük** bir sayı söyle! 📈 ⬆️ *(sıra başka oyuncuda)*` 
+                    : `<:cat_2:1483067331797061703> İddea ${guess} Yanlış ${interaction.user}! Daha **küçük** bir sayı söyle! 📉 ⬇️ *(sıra başka oyuncuda)*`;
                 
                 await interaction.reply({ content: hint });
             }
