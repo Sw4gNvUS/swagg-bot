@@ -29,7 +29,6 @@ const mekanlar = [
     { id: 'mekan_20', isim: 'Uluslararası Gizli İstihbarat Arşivi', adimSayisi: 30, kategori: 'gizli' }
 ];
 
-// Olayları 'olaylar' klasöründen otomatik olarak yükle
 const mekanOlaylari = {};
 const kategoriler = ['kucuk', 'yeralti', 'anti', 'merkez', 'hava', 'vip', 'orta', 'sanayi', 'sanat', 'muze', 'banka', 'magaza', 'kamu', 'luks', 'kumarhane', 'depo', 'avm', 'tekno', 'gizli'];
 
@@ -61,6 +60,9 @@ function setupSoygun(client, puanlar, savePuanlar) {
             }
         }
 
+        // 3 saniye zaman aşımı (timeout) hatasını önlemek için yanıtı erteliyoruz.
+        await interaction.deferReply();
+
         aktifSoygunYapan = interaction.user.id;
 
         const selectMenu = new StringSelectMenuBuilder()
@@ -76,11 +78,10 @@ function setupSoygun(client, puanlar, savePuanlar) {
 
         const row = new ActionRowBuilder().addComponents(selectMenu);
 
-        const initialReply = await interaction.reply({
+        // Defer kullandığımız için mesajı editReply ile gönderiyoruz.
+        const initialReply = await interaction.editReply({
             content: "🦹‍♂️ **Büyük Soygun Planı Kuruluyor!**\nAşağıdaki listeden soygun yapmak istediğin mekanı seç ve maceraya başla:",
-            components: [row],
-            fetchReply: true,
-            ephemeral: false
+            components: [row]
         });
 
         const filterMenu = i => i.user.id === interaction.user.id;
