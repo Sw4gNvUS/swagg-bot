@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { Client, GatewayIntentBits, REST, Routes, SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ActivityType } = require('discord.js');
+const { Client, GatewayIntentBits, REST, Routes, SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ActivityType, ComponentType } = require('discord.js');
 const fs = require('fs');
 
 // YENİ EKLENEN SATIR: Soygun oyununu içeri aktar
@@ -120,6 +120,5 @@ async function startNewGame(interaction) {
 }
 
 // YENİ EKLENEN SATIR: Soygun oyununu bota entegre et
-setupSoygun(client, puanlar, savePuanlar);
-
-client.login('MTUzODEzNDc5MDY0ODM2NTE0Ng.Gazk2Q.NmKII7zvYy2s3WpcPkbLJSrJrVhQTcFtdeSZHc');
+setupSoygun(client, puanlar, savePuanlarAsync);
+client.login(process.env.DISCORD_TOKEN);
