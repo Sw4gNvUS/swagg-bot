@@ -2,7 +2,7 @@ require('dotenv').config();
 const { Client, GatewayIntentBits, REST, Routes, SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ActivityType, ComponentType } = require('discord.js');
 const fs = require('fs');
 
-// YENİ EKLENEN SATIR: Soygun oyununu içeri aktar
+// Soygun oyununu içeri aktar
 const { soygunCommand, setupSoygun } = require('./soygun.js');
 
 const client = new Client({ 
@@ -29,13 +29,12 @@ const commands = [
                 .setMinValue(1)
                 .setMaxValue(100)
         ).toJSON(),
-    soygunCommand // Zaten toJSON() olduğu için tekrar eklemene gerek yok
+    soygunCommand
 ];
 
 client.once('ready', async () => {
     console.log(`Bot aktif: ${client.user.tag}`);
     
-    // Durum ayarları
     client.user.setPresence({
         activities: [{ name: 'Swag Mini Games 🎰', type: ActivityType.Playing }],
         status: 'dnd',
@@ -77,7 +76,6 @@ client.on('interactionCreate', async interaction => {
                 puanlar[interaction.user.id] = (puanlar[interaction.user.id] || 0) + 10;
                 savePuanlar();
 
-                // "Yeni Oyun Başlat" butonu oluştur
                 const row = new ActionRowBuilder().addComponents(
                     new ButtonBuilder().setCustomId('yeni_oyun').setLabel('Yeni Oyun Başlat').setStyle(ButtonStyle.Primary)
                 );
@@ -88,16 +86,17 @@ client.on('interactionCreate', async interaction => {
                 });
                 activeGames.delete(interaction.channelId); 
             } else {
+                // HATA DÜZELTİLDİ: Template literal kullanımı düzeltildi
                 const hint = guess < game.secretNum 
-                    ? "<:cat_2:1483067331797061703> Yanlış ${interaction.user}! Daha **büyük** bir sayı söyle! 📈 ⬆️ *(sıra başka oyuncuda)*" 
-                    : "<:cat_2:1483067331797061703> Yanlış ${interaction.user}! Daha **küçük** bir sayı söyle! 📉 ⬇️ *(sıra başka oyuncuda)*";
+                    ? `<:cat_2:1483067331797061703> Yanlış ${interaction.user}! Daha **büyük** bir sayı söyle! 📈 ⬆️ *(sıra başka oyuncuda)*` 
+                    : `<:cat_2:1483067331797061703> Yanlış ${interaction.user}! Daha **küçük** bir sayı söyle! 📉 ⬇️ *(sıra başka oyuncuda)*`;
                 
-                await interaction.reply({ content: hint.replace('${interaction.user}', interaction.user) });
+                await interaction.reply({ content: hint });
             }
         }
     }
 
-    // 2. Buton Etkileşimi (Yeni Oyun Başlat)
+    // 2. Buton Etkileşimi
     if (interaction.isButton()) {
         if (interaction.customId === 'yeni_oyun') {
             if (activeGames.has(interaction.channelId)) {
@@ -108,17 +107,16 @@ client.on('interactionCreate', async interaction => {
     }
 });
 
-// Oyunu başlatan fonksiyon
+// HATA DÜZELTİLDİ: "tahminim" kelimesi artık düz bir string, fonksiyon içine taşındı
 async function startNewGame(interaction) {
     const secretNum = Math.floor(Math.random() * 100) + 1;
     activeGames.set(interaction.channelId, { secretNum, lastUserId: null });
 
-    const content = `<:embet_ptr2:1527972932922507405> **Swag Spooky 🎃 | Sayı Tahmin Oyunu Başladı 🔢** \n<:embet_ptr2:1527972932922507405> Aklımdan 1 ile 100 arasında bir sayı tuttum. **`/tahminim` komutunu kullanarak** tahminini yapabilirsin *(örn: /tahminim sayi:38)*\n\n<:dot_2:1483169669643899010> ***__Kural:__** Aynı kişi ard arda iki kez tahmin yapamaz!*`;
+    const content = `<:embet_ptr2:1527972932922507405> **Swag Spooky 🎃 | Sayı Tahmin Oyunu Başladı 🔢** \n<:embet_ptr2:1527972932922507405> Aklımdan 1 ile 100 arasında bir sayı tuttum. **\`/tahminim\` komutunu kullanarak** tahminini yapabilirsin *(örn: /tahminim sayi:38)*\n\n<:dot_2:1483169669643899010> ***__Kural:__** Aynı kişi ard arda iki kez tahmin yapamaz!*`;
     
     if (interaction.isChatInputCommand()) await interaction.reply(content);
     else await interaction.update({ content: content + "\n\n*(Oyun yeniden başlatıldı!)*", components: [] });
 }
 
-// YENİ EKLENEN SATIR: Soygun oyununu bota entegre et
 setupSoygun(client, puanlar, savePuanlar);
 client.login(process.env.DISCORD_TOKEN);
