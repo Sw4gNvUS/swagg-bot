@@ -120,5 +120,5 @@ async function startNewGame(interaction) {
 }
 
 // YENİ EKLENEN SATIR: Soygun oyununu bota entegre et
-setupSoygun(client, puanlar, savePuanlarAsync);
+setupSoygun(client, puanlar, savePuanlar);
 client.login(process.env.DISCORD_TOKEN);
