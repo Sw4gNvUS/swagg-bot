@@ -78,7 +78,7 @@ async function startNewGame(interaction) {
     else await interaction.update({ content: content + "\n\n*(Oyun yeniden başlatıldı!)*", components: [] });
 }
 
-// Mesaj Dinleme
+// Mesaj Dinleme (Hızlandırılmış Versiyon)
 client.on('messageCreate', async message => {
     if (message.author.bot || !activeGames.has(message.channel.id)) return;
 
@@ -87,7 +87,7 @@ client.on('messageCreate', async message => {
     if (isNaN(guess)) return;
 
     if (message.author.id === game.lastUserId) {
-        return await message.reply(`<:cat_3:1483067355876819024> **Ard arda tahmin yapamazsın!**`);
+        return await message.channel.send(`<:cat_3:1483067355876819024> **<@${message.author.id}>, ard arda tahmin yapamazsın!**`);
     }
 
     game.lastUserId = message.author.id;
@@ -100,21 +100,21 @@ client.on('messageCreate', async message => {
             new ButtonBuilder().setCustomId('yeni_oyun').setLabel('Yeni Oyun Başlat').setStyle(ButtonStyle.Primary)
         );
 
-        await message.reply({ 
+        await message.channel.send({ 
             content: `🎉 **Tebrikler ${message.author}!** Doğru tahmin! Sayı: **${game.secretNum}**. **10 Puan** kazandın! <a:0_winner:1495905289982050524>`,
             components: [row]
         });
         activeGames.delete(message.channel.id); 
     } else {
-        // message.react kaldırıldı, böylece bot ekstradan API yüküne girmeden anında yanıt verecek.
         const yonlendirme = guess < game.secretNum 
             ? "⬆️ Yanlış! Daha **büyük** bir sayı söyle! 📈 *(sıra başka oyuncuda)*" 
             : "⬇️ Yanlış! Daha **küçük** bir sayı söyle! 📉 *(sıra başka oyuncuda)*";
 
-        await message.reply(`<:cat_2:1483067331797061703> ${yonlendirme}`);
+        await message.channel.send(`<:cat_2:1483067331797061703> <@${message.author.id}> ${yonlendirme}`);
     }
 });
 
 setupSoygun(client, puanlar, savePuanlar);
 
+// Token, .env dosyasından çekilir
 client.login(process.env.DISCORD_TOKEN);
